@@ -12,7 +12,6 @@ import java.nio.file.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ReportProcessor {
     private static final Logger log = LoggerFactory.getLogger(ReportProcessor.class);
@@ -28,49 +27,74 @@ public class ReportProcessor {
         Path backupPath = Paths.get(ReportConstants.PATH_OUTPUT, ReportConstants.FILE_NAME_CSV_BASE + dateToday + ReportConstants.EXT_TXT);
 
         try {
+            // Asegurar rutas de directorios (Incluyendo la de logs desde constantes)
             Files.createDirectories(Paths.get(ReportConstants.PATH_LOGS));
             Files.createDirectories(Paths.get(ReportConstants.PATH_INPUT));
+            Files.createDirectories(Paths.get(ReportConstants.PATH_OUTPUT));
 
             if (!Files.exists(inputPath)) {
-                log.error("Archivo de entrada no encontrado: {}", inputPath);
+                log.error("Archivo de entrada no encontrado en la ruta: {}", inputPath);
                 return;
             }
 
-            log.info("Iniciando lectura de: {}", inputPath.getFileName());
+            log.info("Leyendo archivo origen: {}", inputPath.getFileName());
 
-            List<String> allLines = Files.readAllLines(inputPath, Charset.forName(ReportConstants.CHARSET_WINDOWS));
-            if (allLines.isEmpty()) return;
+            // Invocación del método de transformación
+            List<String> txtLines = transformContent(inputPath);
 
-            // 1. Mapear dinámicamente qué columna está en qué índice del CSV
-            Map<ReportColumn, Integer> indexMap = mapCsvHeaders(allLines.get(0));
-
-            // 2. Transformar datos
-            List<String> txtLines = new ArrayList<>();
-            txtLines.add(generateTxtHeader()); // Cabecera fija
-
-            for (int i = 1; i < allLines.size(); i++) {
-                txtLines.add(formatLine(allLines.get(i), indexMap));
-            }
-
-            // 3. Escribir en UTF-8
+            // Escritura en UTF-8
             byte[] finalBytes = String.join(System.lineSeparator(), txtLines).getBytes(StandardCharsets.UTF_8);
+
             Files.write(outputPath, finalBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             Files.write(backupPath, finalBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
-            log.info("Reporte generado exitosamente. Backup: {}", backupPath.getFileName());
+            log.info("Reporte '{}' generado exitosamente.", ReportConstants.FILE_NAME_TXT_FINAL);
+            log.info("Backup creado: {}", backupPath.getFileName());
 
         } catch (IOException e) {
-            log.error("Error procesando archivos: {}", e.getMessage());
+            log.error("Error crítico en el procesamiento: {}", e.getMessage());
         }
+    }
+
+    /**
+     * Responsable de la lógica de transformación de formato CSV a Ancho Fijo.
+     */
+    private List<String> transformContent(Path inputPath) throws IOException {
+        Charset win1252 = Charset.forName(ReportConstants.CHARSET_WINDOWS);
+        List<String> allLines = Files.readAllLines(inputPath, win1252);
+
+        if (allLines.isEmpty()) {
+            log.warn("El archivo origen está vacío.");
+            return Collections.emptyList();
+        }
+
+        // 1. Mapear índices usando ReportColumn.findMatch (Sincroniza CSV con el Enum)
+        Map<ReportColumn, Integer> indexMap = mapCsvHeaders(allLines.get(0));
+
+        List<String> result = new ArrayList<>();
+
+        // 2. Generar Cabecera TXT
+        result.add(generateTxtHeader());
+
+        // 3. Procesar Líneas de Datos
+        for (int i = 1; i < allLines.size(); i++) {
+            result.add(formatLine(allLines.get(i), indexMap));
+        }
+
+        return result;
     }
 
     private Map<ReportColumn, Integer> mapCsvHeaders(String headerLine) {
         Map<ReportColumn, Integer> map = new HashMap<>();
         String[] headers = headerLine.split(",");
+
         for (int i = 0; i < headers.length; i++) {
-            int finalI = i;
-            ReportColumn.findMatch(headers[i])
-                    .ifPresent(col -> map.put(col, finalI));
+            // Creamos una variable final que capture el valor de i para esta iteración
+            final int currentIndex = i;
+            String currentHeader = headers[i].trim();
+
+            ReportColumn.findMatch(currentHeader)
+                    .ifPresent(col -> map.put(col, currentIndex));
         }
         return map;
     }
@@ -97,6 +121,7 @@ public class ReportProcessor {
 
     private String padRight(String text, int length) {
         String safeText = (text == null) ? "" : text;
+        // %-Ns rellena con espacios a la derecha, .N trunca si es más largo
         return String.format("%-" + length + "." + length + "s", safeText);
     }
 }
