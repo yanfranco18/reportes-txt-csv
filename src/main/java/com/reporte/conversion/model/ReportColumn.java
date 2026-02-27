@@ -10,7 +10,8 @@ public enum ReportColumn {
     PESO("peso", 51, 10),
     ALTURA("altura", 61, 10),
     TIPO_PRODUCTO("tipo_producto", 71, 15),
-    MATERIAL("material", 86, 15);
+    MATERIAL("material", 86, 15),
+    PRECIO("precio", 101, 15);
 
     private final String columnName;
     private final int position;
@@ -40,7 +41,15 @@ public enum ReportColumn {
     }
 
     // Getters
-    public String getColumnName() { return columnName; }
-    public int getPosition() { return position; }
-    public int getLength() { return length; }
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public int getLength() {
+        return length;
+    }
 }

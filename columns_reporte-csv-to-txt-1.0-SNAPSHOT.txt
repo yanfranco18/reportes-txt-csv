@@ -1,0 +1,8 @@
+id_producto,1,15
+descripcion,16,35
+fecha_ingreso,51,25
+peso,76,12
+altura,88,12
+tipo_producto,100,20
+material,120,20
+precio,140,15

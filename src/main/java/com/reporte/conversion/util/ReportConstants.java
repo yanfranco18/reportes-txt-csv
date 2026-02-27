@@ -2,7 +2,8 @@ package com.reporte.conversion.util;
 
 public final class ReportConstants {
 
-    // Constructor privado para evitar que se instancie la clase (Principio Utility Class)
+    // Constructor privado para evitar que se instancie la clase (Principio Utility
+    // Class)
     private ReportConstants() {
         throw new UnsupportedOperationException("Clase de utilidades");
     }
@@ -20,6 +21,8 @@ public final class ReportConstants {
     // Configuración Técnica
     public static final String CHARSET_WINDOWS = "windows-1252";
     public static final String DATE_PATTERN = "dd-MM-yyyy";
+    // Expresión regular para separar por comas ignorando comas dentro de comillas
+    public static final String REG_EXP = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
 
     // Extensiones
     public static final String EXT_CSV = ".csv";

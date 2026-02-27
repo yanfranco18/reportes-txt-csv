@@ -1,9 +1,12 @@
 <configuration>
-    <property name="LOG_PATH" value="C:/reportes/txt/log" />
+    <!-- <property name="LOG_PATH" value="C:/reportes/txt/log" /> -->
+    <property name="LOG_PATH_DYNAMIC" value="${path.logs}" />
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH_DYNAMIC}/log_reporte_general.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/log_reporte_general%d{dd-MM-yyyy}.txt</fileNamePattern>
+            <!-- <fileNamePattern>${LOG_PATH}/log_reporte_general%d{dd-MM-yyyy}.txt</fileNamePattern> -->
+            <fileNamePattern>${LOG_PATH_DYNAMIC}/log_reporte_general%d{dd-MM-yyyy}.txt</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
 

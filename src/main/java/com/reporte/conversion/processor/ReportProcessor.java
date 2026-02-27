@@ -22,9 +22,11 @@ public class ReportProcessor {
         String dateYesterday = today.minusDays(1).format(DATE_FORMATTER);
         String dateToday = today.format(DATE_FORMATTER);
 
-        Path inputPath = Paths.get(ReportConstants.PATH_INPUT, ReportConstants.FILE_NAME_CSV_BASE + dateYesterday + ReportConstants.EXT_CSV);
+        Path inputPath = Paths.get(ReportConstants.PATH_INPUT,
+                ReportConstants.FILE_NAME_CSV_BASE + dateYesterday + ReportConstants.EXT_CSV);
         Path outputPath = Paths.get(ReportConstants.PATH_OUTPUT, ReportConstants.FILE_NAME_TXT_FINAL);
-        Path backupPath = Paths.get(ReportConstants.PATH_OUTPUT, ReportConstants.FILE_NAME_CSV_BASE + dateToday + ReportConstants.EXT_TXT);
+        Path backupPath = Paths.get(ReportConstants.PATH_OUTPUT,
+                ReportConstants.FILE_NAME_CSV_BASE + dateToday + ReportConstants.EXT_TXT);
 
         try {
             // Asegurar rutas de directorios (Incluyendo la de logs desde constantes)
@@ -86,7 +88,7 @@ public class ReportProcessor {
 
     private Map<ReportColumn, Integer> mapCsvHeaders(String headerLine) {
         Map<ReportColumn, Integer> map = new HashMap<>();
-        String[] headers = headerLine.split(",");
+        String[] headers = headerLine.split(ReportConstants.REG_EXP);
 
         for (int i = 0; i < headers.length; i++) {
             // Creamos una variable final que capture el valor de i para esta iteración
@@ -108,12 +110,18 @@ public class ReportProcessor {
     }
 
     private String formatLine(String csvLine, Map<ReportColumn, Integer> indexMap) {
-        String[] fields = csvLine.split(",", -1);
+        String[] fields = csvLine.split(ReportConstants.REG_EXP, -1);
         StringBuilder sb = new StringBuilder();
 
         for (ReportColumn col : ReportColumn.values()) {
             Integer index = indexMap.get(col);
             String value = (index != null && index < fields.length) ? fields[index].trim() : "";
+
+            // Limpieza de comillas si existen (ej: "-7,900.00" -> -7,900.00)
+            if (value.startsWith("\"") && value.endsWith("\"")) {
+                value = value.substring(1, value.length() - 1);
+            }
+
             sb.append(padRight(value, col.getLength()));
         }
         return sb.toString();

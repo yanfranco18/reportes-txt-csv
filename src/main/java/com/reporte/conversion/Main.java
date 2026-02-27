@@ -1,6 +1,6 @@
 package com.reporte.conversion;
 
-import com.reporte.conversion.processor.ReportProcessor;
+import com.reporte.conversion.processor.ReportProcessorShell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,10 +8,10 @@ public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        log.info("=== INICIANDO SISTEMA DE CONVERSIÓN CSV A TXT ===");
+        log.info("=== INICIANDO SISTEMA DE CONVERSIÓN CSV A TXT (DINÁMICO) ===");
 
         try {
-            ReportProcessor processor = new ReportProcessor();
+            ReportProcessorShell processor = new ReportProcessorShell();
             processor.execute();
         } catch (Exception e) {
             log.error("Error inesperado en la ejecución: {}", e.getMessage(), e);
